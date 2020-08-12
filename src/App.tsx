@@ -1,11 +1,14 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import GameBoard from './components/GameBoard';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
+interface AppProps { }
+
+class App extends React.Component<AppProps> {
+  render = () => {
+    return (
+      <div className="App">
+        {/* <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
@@ -18,9 +21,11 @@ function App() {
         >
           Learn React
         </a>
-      </header>
-    </div>
-  );
+      </header> */}
+        <GameBoard />
+      </div>
+    );
+  }
 }
 
 export default App;
