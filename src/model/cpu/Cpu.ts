@@ -30,6 +30,7 @@ export interface GameInfo {
 class RandomCpu {
     status: CpuStatus = "IDLE"
     onStatusChanged: (() => void)
+    isFast = false
 
     requestSet: GameInfo[] = []
     doneSet: GameInfo[] = []
@@ -66,11 +67,11 @@ class RandomCpu {
 
         this.updateStatus("THINKING")
 
-        await this.sleep(500)
+        await this.sleep(this.isFast ? 10 : 500)
 
         this.updateStatus(this.shouldPay(info) ? "PAY" : "DRAW")
 
-        await this.sleep(200)
+        await this.sleep(this.isFast ? 10 : 1000)
 
         this.updateStatus("IDLE")
 
@@ -123,5 +124,9 @@ export class CpuSet {
     }
 
     terminate = () => {
+    }
+
+    setFastMode = (isFast: boolean) => {
+        this.cpus.forEach((cpu) => { cpu.isFast = isFast })
     }
 }

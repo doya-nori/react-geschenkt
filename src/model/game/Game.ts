@@ -5,12 +5,12 @@ import { CpuSet, CpuStatus } from '../cpu/Cpu';
 const PLAYER_NUM = 3
 const DEFAULT_CHIP = 11
 
-interface GameSnapshot {
+export interface GameSnapshot {
     isOver: boolean,
     winner: string,
     upcard: number,
     stack: number,
-    deckRemain: number,
+    remaining: number,
     turn: number,
     players: PlayerSnapshot[],
     cpuStatus: string[],
@@ -23,6 +23,7 @@ export default class Game {
     players: Player[]
     turn: number = 0
     cpu: CpuSet
+    private isFastMode = false
 
     c = count++;
 
@@ -37,6 +38,7 @@ export default class Game {
         }
         this.cpu = new CpuSet(PLAYER_NUM)
         this.cpu.onStatusChanged = this.onCpuStatusChanged
+        this.cpu.setFastMode(this.isFastMode)
     }
 
     start = () => {
@@ -63,6 +65,7 @@ export default class Game {
 
         if (this.table.isEmpty()) {
             this.turn = -1
+            this.onOver()
         }
 
         this.onUpdated(this.snapshot())
@@ -75,11 +78,13 @@ export default class Game {
 
     private onCpuStatusChanged = (status: CpuStatus[]) => {
         if (status[this.turn] === "PAY") {
-            setTimeout(() => { this.pay(this.turn) }, 100)
+            setTimeout(() => { this.pay(this.turn) },
+                this.isFastMode ? 10 : 500)
         }
 
         if (status[this.turn] === "DRAW") {
-            setTimeout(() => { this.draw(this.turn) }, 100)
+            setTimeout(() => { this.draw(this.turn) },
+                this.isFastMode ? 10 : 500)
         }
 
         this.onUpdated(this.snapshot())
@@ -115,13 +120,20 @@ export default class Game {
 
     onUpdated = (snapshot: GameSnapshot) => { }
 
+    onOver = () => { }
+
+    setFastMode = (isFast: boolean) => {
+        this.isFastMode = isFast
+        this.cpu.setFastMode(isFast)
+    }
+
     snapshot = (): GameSnapshot => {
         return {
             isOver: this.isOver(),
             winner: this.getWinner().name,
             upcard: this.table.upcard,
             stack: this.table.chipStack,
-            deckRemain: this.table.remain(),
+            remaining: this.table.remain(),
             turn: this.turn,
             players: this.players.map((p) => p.snapshot()),
             cpuStatus: this.cpu.printStatus(),

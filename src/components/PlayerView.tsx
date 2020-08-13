@@ -1,22 +1,19 @@
-import { Box, Button, Grid, makeStyles, Paper } from "@material-ui/core";
+import { Box, Button, Chip, Grid, makeStyles, Paper, Typography } from "@material-ui/core";
 import ComputerIcon from '@material-ui/icons/Computer';
 import FaceIcon from '@material-ui/icons/Face';
-import StarIcon from '@material-ui/icons/Star';
 import React from "react";
 import { Config } from "./GameBoard";
 
 const useStyles = makeStyles((theme) => ({
     base: {
-        padding: "12px",
-        backgroundColor: "#F9FBE7",
+        backgroundColor: theme.palette.primary.light,
         marginTop: "4px",
         marginBottom: "4px",
-        fill: "true",
     },
     name: {
         margin: "auto",
         textAlign: "center",
-        padding: "16px",
+        padding: "4px",
         backgroundColor: "#607D8B",
         color: "#FFFFFF"
     },
@@ -26,12 +23,13 @@ const useStyles = makeStyles((theme) => ({
     handCard: {
         textAlign: "center",
         padding: "4px",
-        fontSize: "12px",
+        fontSize: "0.8rem",
         margin: "4px",
-        fill: "true"
     },
-    bsutton: {
-
+    button: {
+        fontSize: "0.8rem",
+        padding: "0rem",
+        flexShrink: 1,
     },
     turnIcon: {
         padding: "4px",
@@ -53,72 +51,98 @@ interface PlayerViewProps {
     onDraw(): void
 }
 
+
+
+
 const PlayerView = (props: PlayerViewProps) => {
     const classes = useStyles()
+
     const showsButton = (!props.isCpu && props.isTurn)
+    const showsStatus = props.isCpu
 
     const showsScore = !props.config.hidesScore && !props.config.hidesScore
     const showsChip = !(props.isCpu && props.config.hidesCpuInfo)
     const showsHand = !(props.isCpu && props.config.hidesCpuInfo)
+
+    const PlayerFace = () => {
+        return (
+            <Box display="flex" justifyContent="center">
+                <Chip
+                    color={props.isTurn ? "secondary" : "default"}
+                    label={props.name}
+                    icon={props.isCpu ? <ComputerIcon /> : <FaceIcon />}
+                />
+            </Box>
+        )
+    }
+    const Buttons = () => {
+        return (
+            <Grid container >
+                <Grid item xs={6} >
+                    <Box display="flex" justifyContent="center">
+                        <Button
+                            className={classes.button}
+                            variant="contained" onClick={props.onPay}
+                        >PAY</Button>
+                    </Box>
+                </Grid>
+                <Grid item xs={6}>
+                    <Box display="flex" justifyContent="center">
+                        <Button
+                            className={classes.button}
+                            variant="contained" onClick={props.onDraw}
+                        >DRAW</Button>
+                    </Box>
+                </Grid>
+            </Grid>
+        )
+    }
+
+    const Status = () => {
+        return (
+            <Typography variant="body2">
+                {props.cpuStatus}
+            </Typography>
+        )
+    }
+
+    const Hand = () => {
+        return (
+            <Grid container className={classes.handContainer}>
+                {props.hand.map((value) => {
+                    return (
+                        <Grid item xs={2} sm={1} key={String(value)} >
+                            <Paper className={classes.handCard}>
+                                {showsHand ? String(value) : "??"}
+                            </Paper>
+                        </Grid>
+                    )
+                })}
+            </Grid>
+        )
+    }
 
     return (
         <Grid
             container
             className={classes.base}
             spacing={2}
-            justify="flex-start"
+            justify="space-evenly"
             alignItems="center"
         >
-            <Grid item sm={1}>
-                {props.isTurn && <StarIcon className={classes.turnIcon} />}
+            <Grid item xs={4}>
+                <PlayerFace />
             </Grid>
-            <Grid item sm={1}>
-                {props.isCpu ? <ComputerIcon /> : <FaceIcon />}
+            <Grid item xs sm />
+            <Grid item xs={7} sm={4}>
+                {showsButton && <Buttons />}
+                {showsStatus && <Status />}
             </Grid>
-            <Grid item sm={4}>
-                <Box className={classes.name}>
-                    {props.name}
-                </Box>
+
+            <Grid item xs={12} sm={8}>
+                <Hand />
             </Grid>
-            <Grid item sm={2} />
-            {showsButton &&
-                <Grid item sm={2}>
-                    <Button
-                        variant="contained"
-                        onClick={props.onPay}
-                        disabled={props.chip === 0}
-                    >PAY</Button>
-                </Grid>
-            }
-            {showsButton &&
-                <Grid item sm={2} >
-                    <Button variant="contained" onClick={props.onDraw}
-                    >DRAW</Button>
-                </Grid>
-            }
-            {!showsButton && (props.isCpu ?
-                (<Grid item sm={4}>
-                    {props.cpuStatus}
-                </Grid>)
-                :
-                <Grid item sm={4} />
-            )
-            }
-            <Grid item sm={1} />
-            <Grid item sm>
-                <Grid container className={classes.handContainer}>
-                    {props.hand.map((value) => {
-                        return (
-                            <Grid item sm={1} key={String(value)} >
-                                <Paper className={classes.handCard}>
-                                    {showsHand ? String(value) : "??"}
-                                </Paper>
-                            </Grid>
-                        )
-                    })}
-                </Grid>
-            </Grid>
-            <Grid item sm={2}>
+            <Grid item xs={12} sm={4}>
                 <Box>
                     {showsChip && "Chip: " + props.chip}
 

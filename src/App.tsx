@@ -1,29 +1,28 @@
 import React from 'react';
 import './App.css';
 import GameBoard from './components/GameBoard';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core';
+import { lime, amber } from '@material-ui/core/colors';
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: lime[500],
+    },
+    secondary: {
+      main: amber[800],
+    },
+  },
+})
 
 interface AppProps { }
 
 class App extends React.Component<AppProps> {
   render = () => {
     return (
-      <div className="App">
-        {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header> */}
+      <ThemeProvider theme={theme}>
         <GameBoard />
-      </div>
+      </ThemeProvider>
     );
   }
 }
