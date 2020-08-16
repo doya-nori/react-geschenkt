@@ -1,11 +1,16 @@
-import { Box, Button, Checkbox, Container, Grid, Typography } from '@material-ui/core';
+import { Backdrop, Box, Button, Checkbox, CircularProgress, Container, Grid, Typography } from '@material-ui/core';
+import { lime } from '@material-ui/core/colors';
 import { makeStyles } from '@material-ui/core/styles';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { auth, loginGoogle, logout } from '../firebase';
 import Game from '../model/game/Game';
 import PlayerView from './PlayerView';
 import TableView from './TableView';
 
 const useStyles = makeStyles((theme) => ({
+    container: {
+        outlineColor: lime[50],
+    },
     restartButton: {
         margin: "16px",
         backgroundColor: "#2196F3",
@@ -26,9 +31,12 @@ const useStyles = makeStyles((theme) => ({
     check: {
         fontSize: "0.2rem"
     },
-
     configCheck: {
         color: theme.palette.secondary.main,
+    },
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff',
     },
 }));
 
@@ -64,6 +72,13 @@ const GameBoard = () => {
         setSnapshot(gameRef.current.snapshot())
     }, [setSnapshot])
 
+    const [user, setUser] =
+        useState(undefined as (null | undefined | firebase.User))
+
+    auth.onAuthStateChanged((user) => {
+        setUser(user)
+    })
+
     const [config, setConfig] = useState(initConfig)
     gameRef.current.setFastMode(config.fastMode)
 
@@ -93,7 +108,27 @@ const GameBoard = () => {
     }
 
     return (
-        <Container maxWidth="sm">
+        <Container maxWidth="sm"
+            className={classes.container}
+            tabIndex={-1}
+            onKeyDown={(e) => {
+                let game = gameRef.current
+                if (game.isOver() || game.turn !== 0) return
+                if (e.keyCode === 80 && game.players[0].chip > 0) game.pay(0)
+                if (e.keyCode === 68) game.draw(0)
+            }}>
+
+            {user === null &&
+                <Button onClick={loginGoogle}>
+                    GOOGLE LOGIN
+                </Button>
+            }
+            {user !== null && user !== undefined &&
+                <Button onClick={logout}>
+                    LOGOUT
+                </Button>
+            }
+
             {snapshot.isOver ?
                 <Typography className={classes.winner}>
                     {snapshot.winner} WIN!!
@@ -109,10 +144,18 @@ const GameBoard = () => {
                 alignItems="center">
 
                 {snapshot.players.map((player, index) => {
+                    var name = player.name
+                    if (!player.isCpu &&
+                        user !== null
+                        && user !== undefined
+                        && user.displayName !== null) {
+                        name = user.displayName
+                    }
+
                     return (
                         <Grid item xs={12} key={String(index)}>
                             <PlayerView
-                                name={player.name}
+                                name={name}
                                 isCpu={player.isCpu}
                                 cpuStatus={player.isCpu ? snapshot.cpuStatus[index] : ""}
                                 isTurn={index === snapshot.turn}
@@ -159,6 +202,10 @@ const GameBoard = () => {
                     </Box>
                 </Grid>
             </Grid>
+            <Backdrop
+                className={classes.backdrop} open={user === undefined}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </Container >
     )
 }

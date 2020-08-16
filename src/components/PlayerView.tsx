@@ -36,6 +36,9 @@ const useStyles = makeStyles((theme) => ({
         fontSize: "24px",
         color: "#FF5722"
     },
+    userChip: {
+        maxWidth: "100%"
+    }
 }));
 
 interface PlayerViewProps {
@@ -51,9 +54,6 @@ interface PlayerViewProps {
     onDraw(): void
 }
 
-
-
-
 const PlayerView = (props: PlayerViewProps) => {
     const classes = useStyles()
 
@@ -62,12 +62,13 @@ const PlayerView = (props: PlayerViewProps) => {
 
     const showsScore = !props.config.hidesScore && !props.config.hidesScore
     const showsChip = !(props.isCpu && props.config.hidesCpuInfo)
-    const showsHand = !(props.isCpu && props.config.hidesCpuInfo)
 
     const PlayerFace = () => {
         return (
-            <Box display="flex" justifyContent="center">
+            <Box display="flex" justifyContent="center"
+                textOverflow="ellipsis">
                 <Chip
+                    className={classes.userChip}
                     color={props.isTurn ? "secondary" : "default"}
                     label={props.name}
                     icon={props.isCpu ? <ComputerIcon /> : <FaceIcon />}
@@ -75,15 +76,18 @@ const PlayerView = (props: PlayerViewProps) => {
             </Box>
         )
     }
+
+
     const Buttons = () => {
         return (
-            <Grid container >
+            <Grid container>
                 <Grid item xs={6} >
                     <Box display="flex" justifyContent="center">
                         <Button
                             className={classes.button}
                             variant="contained" onClick={props.onPay}
-                        >PAY</Button>
+                            disabled={props.chip < 1}
+                        >PAY [P]</Button>
                     </Box>
                 </Grid>
                 <Grid item xs={6}>
@@ -91,7 +95,7 @@ const PlayerView = (props: PlayerViewProps) => {
                         <Button
                             className={classes.button}
                             variant="contained" onClick={props.onDraw}
-                        >DRAW</Button>
+                        >DRAW [D]</Button>
                     </Box>
                 </Grid>
             </Grid>
@@ -113,7 +117,7 @@ const PlayerView = (props: PlayerViewProps) => {
                     return (
                         <Grid item xs={2} sm={1} key={String(value)} >
                             <Paper className={classes.handCard}>
-                                {showsHand ? String(value) : "??"}
+                                {String(value)}
                             </Paper>
                         </Grid>
                     )
